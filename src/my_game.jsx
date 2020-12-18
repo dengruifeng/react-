@@ -6,7 +6,12 @@ function Square(props) {
         onClick={props.onClick}
         style={props.winner ? {color: 'green'} : null}
       >
-        {props.value}
+        {
+          props.value ? 
+          <div className={props.value === 'O' ? 'chess'  :'chess black-chess'} style={props.winner ? {backgroundColor: 'green'} : null}></div>
+          :
+          null
+        }
       </button>
   )
 }
@@ -67,20 +72,22 @@ class Game extends React.Component {
     this.state = {
       history: [{
         squares: Array(9).fill(null),
-        coordinate: [0,0],
+        index: [0,0],
       }],
       stepNumber: 0,
       xIsNext: true,
       ascendingOrDescending: true,
+      whiteRegret: 1,
+      blackRegret: 1,
     }
   }
   handleClick(i) {
     const history = this.state.history.slice(0, this.state.stepNumber + 1);
     const current = history[history.length - 1];
     const squares = current.squares.slice();
-    const coordinate = current.coordinate.slice();
-    coordinate[0] = parseInt((i)/3);
-    coordinate[1] = parseInt(i%3);
+    const index = current.index.slice();
+    index[0] = parseInt((i)/3);
+    index[1] = parseInt(i%3);
     if (calculateWinner(squares) || squares[i]) {
       return;
     }
@@ -88,7 +95,7 @@ class Game extends React.Component {
     this.setState({
       history: history.concat([{
         squares: squares,
-        coordinate,
+        index,
       }]),
       stepNumber: history.length,
       xIsNext: !this.state.xIsNext,
@@ -107,50 +114,85 @@ class Game extends React.Component {
       }
     )
   }
+  regretClick() {
+    if(!this.state.xIsNext) {
+      if(this.state.blackRegret === 0) {
+        alert('没机会了^_^')
+        return;
+      }
+      let history = this.state.history;
+      history.pop()
+      this.setState({
+        history: history,
+        xIsNext: !this.state.xIsNext,
+        stepNumber: this.state.stepNumber - 1,
+        blackRegret:  this.state.blackRegret - 1,
+      })
+    } else {
+      if(this.state.whiteRegret === 0) {
+        alert('没机会了^_^')
+        return;
+      }
+      let history = this.state.history;
+      history.pop()
+      this.setState({
+        history: history,
+        xIsNext: !this.state.xIsNext,
+        stepNumber: this.state.stepNumber - 1,
+        whiteRegret:  this.state.whiteRegret - 1,
+      })
+    }
+  }
+  resetClick() {
+    this.setState({
+      history: [{
+        squares: Array(9).fill(null),
+        index: [0,0],
+      }],
+      stepNumber: 0,
+      xIsNext: true,
+      ascendingOrDescending: true,
+      whiteRegret: 1,
+      blackRegret: 1,
+    })
+  }
   render() {
     const history = this.state.history;
-    const ascendingOrDescending = this.state.ascendingOrDescending;
+    const {whiteRegret, blackRegret} = this.state;
     const current = history[this.state.stepNumber];
     const winner = calculateWinner(current.squares);
     const isNull = current.squares.includes(null); // 判断是否最后一步
-    const ascendingOrDescendingArray = ascendingOrDescending ? this.state.history : this.state.history.concat([]).reverse();
-    const moves = ascendingOrDescendingArray.map((step, move) => {
-      const desc = move ?
-        '去哪儿 #' + (ascendingOrDescending ? move : (ascendingOrDescendingArray.length - move)) + "坐标" + step.coordinate :
-        '开始';
-      let bold = false;
-      if(ascendingOrDescending) {
-        bold = history.length === (move + 1);
-      } else {
-        bold = move === 1;
-      }
-      return (
-        <li key={move}>
-          <button style={bold ? {fontWeight: 900} : null} onClick={() => this.jumpTo(move)}>{desc}</button>
-        </li>
-      );
-    });
     let status;
     if (winner) {
-      status = '赢家: ' + winner.winner;
+      status = '赢家: ' + (winner.winner === 'O' ? '白棋' : '黑棋');
     }else if (!isNull) {
       status = '平局';
     } else {
-      status = '下一玩家: ' + (this.state.xIsNext ? 'X' : 'O');
+      status = '出棋玩家: ' + (this.state.xIsNext ? '黑棋' : '白棋');
     }
     return (
       <div className="game">
         <div className="game-board">
+          <div className="game-board-title">
+             {status}
+             <div className="game-board-title-record">
+                <div>{'白悔棋：' + whiteRegret}</div>
+                <div>{'黑悔棋：' + blackRegret}</div>
+             </div>
+             <div className="game-board-title-record">
+                <button onClick={() => {this.regretClick()}}>
+                  悔棋
+                </button>
+                <button onClick={() => {this.resetClick()}}>
+                  重置
+                </button>
+             </div>
+          </div>
           <Board 
             squares={current.squares}
             winnerArray={winner?.lines}
             onClick={(i) => {this.handleClick(i)}}
           />
-        </div>
-        <div className="game-info">
-          <div>{status}</div>
-          <button onClick={() => this.ascendingOrDescending()}>{ascendingOrDescending ? '升序' :'降序'}</button>
-          <ol>{moves}</ol>
         </div>
       </div>
     );

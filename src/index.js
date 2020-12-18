@@ -1,11 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import Game from './index.jsx'
+import Home from './home.jsx'
 
 
 ReactDOM.render(
-  <Game/>,
+  <Home/>,
   document.getElementById('root')
 );
 

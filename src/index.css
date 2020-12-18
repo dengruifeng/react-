@@ -21,6 +21,11 @@ ol, ul {
   display: table;
 }
 
+.home-box{
+  display: flex;
+  justify-content: space-around;
+}
+
 .status {
   margin-bottom: 10px;
 }
@@ -38,10 +43,29 @@ ol, ul {
   padding: 0;
   text-align: center;
   width: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
+.chess {
+  width: 20px;
+  height: 20px;
+  background-color: white;
+  border-radius: 50%;
+  border: 1px solid;
+ }
+
+ .black-chess{
+  background-color: black;
+ }
 
 .square:focus {
   outline: none;
+}
+
+.game-board-title-record{
+  display: flex;
 }
 
 .kbd-navigation .square:focus {
@@ -56,3 +80,4 @@ ol, ul {
 .game-info {
   margin-left: 20px;
 }
+
